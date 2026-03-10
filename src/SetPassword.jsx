@@ -360,8 +360,10 @@ export default class SetPassword extends Component {
             <form className="login-box" onSubmit={this.handleSubmit}>
               <h2>Set New Password</h2>
 
+             
+             
               {/* TEMP PASSWORD */}
-              <label className="login-label">Entire Email sent Password</label>
+              <label className="login-label">Enter Email sent Password</label>
               <div className="password-wrapper">
                 <input
                   type={this.state.showOldPassword ? 'text' : 'password'}

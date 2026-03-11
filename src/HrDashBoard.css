@@ -1171,8 +1171,34 @@ body {
   display: flex;
   align-items: center;
 }
-.password-field input { flex: 1; padding-right: 32px; }
 
+.password-field input {
+  flex: 1;
+  padding-right: 36px !important; /* always reserve space for the eye icon */
+}
+
+.eye-btn {
+  position: absolute;
+  right: 0px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px 6px;
+  color: var(--text-muted);
+  line-height: 1;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  height: 28px;
+  width: 28px;
+}
+
+.eye-btn:hover { color: var(--accent); }
 .eye-btn {
   position: absolute;
   right: 0;

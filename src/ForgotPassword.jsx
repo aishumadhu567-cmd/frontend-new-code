@@ -255,7 +255,7 @@ export default class ForgotPassword extends Component {
         this.setState({
           message: 'Please check your registered email. We sent a new password.'
         });
-        window.alert('Please check your registered email. We sent a new password.');
+        window.alert('Password updated successfully! Please check your registered email.');
 
         setTimeout(() => {
           this.setState({ redirect: true });

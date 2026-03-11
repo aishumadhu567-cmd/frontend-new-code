@@ -374,7 +374,7 @@ export default class SetPassword extends Component {
                   className="login-input password-input"
                   required
                 />
-                <button
+                <button                    
                   type="button"
                   className="password-toggle"
                   onClick={this.toggleOldPassword}

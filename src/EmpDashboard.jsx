@@ -166,7 +166,8 @@ export default class EmpDashboard extends Component {
         if (!res.ok) throw new Error();
         return res.text();
       })
-      .then(() =>
+      .then(() => {
+        alert("Password updated successfully!");
         this.setState({
           message: "✓ Password changed successfully",
           showChangePassword: false,
@@ -174,8 +175,8 @@ export default class EmpDashboard extends Component {
           confirmPassword: "",
           newPasswordError: "",
           confirmPasswordError: "",
-        })
-      )
+        });
+      })
       .catch(() =>
         this.setState({ message: "✗ Failed to update password" })
       );
@@ -384,7 +385,7 @@ export default class EmpDashboard extends Component {
           <div className="emp-modal-overlay">
             <div className="emp-modal-box">
               <div className="modal-header">
-                <h4>Change Password</h4>
+                <h4 style={{ color: '#fff' }}>Change Password</h4>
                 <button 
                   className="close-modal"
                   onClick={() =>

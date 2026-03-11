@@ -196,6 +196,7 @@ export default function ReportingManager() {
               <p style={{ fontSize: 14, color: "#6B7280", margin: 0 }}>No manager assigned</p>
             </div>
           )}
+          
         </section>
 
         {/* ── RIGHT: My Team ── */}

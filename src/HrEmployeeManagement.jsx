@@ -1101,7 +1101,6 @@ const visibleSteps =
               <h3>🔍 Search Employee</h3>
               <p>Search for an existing employee to edit, or skip to create a new one</p>
             </div>
-
             <div className="search-container">
               <div className="search-input-wrapper">
                 {/* <input
@@ -1113,48 +1112,29 @@ const visibleSteps =
                   className="modern-input"
                 /> */}
                 <input
-  type="text"
-  placeholder="e.g., VPPL001"
-  value={searchValue}
-  maxLength={7}
-  className="modern-input"
-  onFocus={() => {
-    if (!searchValue) setSearchValue("VPPL");
-  }}
-  onChange={(e) => {
-    let value = e.target.value.toUpperCase();
-
-    // Always force prefix
-    if (!value.startsWith("VPPL")) {
-      value = "VPPL";
-    }
-
-    // Keep digits only after VPPL
-    const digits = value.slice(4).replace(/\D/g, "");
-
-    // Allow max 3 digits
-    const finalValue = "VPPL" + digits.slice(0, 3);
-
-    setSearchValue(finalValue);
-  }}
-  onKeyDown={(e) => {
-    // Allow digits + control keys only, and Enter for search
-    if (
-      !/[0-9]/.test(e.key) &&
-      !["Backspace", "Tab", "ArrowLeft", "ArrowRight", "Delete", "Enter"].includes(e.key)
-    ) {
-      e.preventDefault();
-    }
-    if (e.key === "Enter") handleSearch();
-  }}
-/>
-                <button onClick={handleSearch} className="search-btn" disabled={searchLoading}>
-                  {searchLoading ? "Searching..." : "Search"}
-                </button>
+                  type="text"
+                  placeholder="Search by Employee ID, First Name, Department, Designation"
+                  value={searchValue}
+                  className="modern-input"
+                  onChange={(e) => {
+                    // Allow letters, numbers, and spaces for flexible search
+                    let value = e.target.value.replace(/[^A-Za-z0-9 ]/g, "");
+                    setSearchValue(value);
+                  }}
+                  onKeyDown={(e) => {
+                    // Allow letters, numbers, spaces, and control keys
+                    if (
+                      !/[a-zA-Z0-9 ]/.test(e.key) &&
+                      !["Backspace", "Tab", "ArrowLeft", "ArrowRight", "Delete", "Enter"].includes(e.key)
+                    ) {
+                      e.preventDefault();
+                    }
+                    if (e.key === "Enter") handleSearch();
+                  }}
+                />
               </div>
-
-             {showSearchResults && searchResults.length > 0 && (
-  <div className="search-results-card" ref={searchResultsRef}>
+              {showSearchResults && searchResults.length > 0 && (
+                <div className="search-results-card" ref={searchResultsRef}>
                   {/* <div className="results-header">
                     <h4>Found {searchResults.length} employee(s)</h4>
                     <button onClick={() => setShowSearchResults(false)}>×</button>
@@ -1181,11 +1161,6 @@ const visibleSteps =
                   )}
                 </div>
               )}
-
-              <div className="or-divider">
-                <span>OR</span>
-              </div>
-
               <button onClick={() => setCurrentStep(2)} className="create-new-btn">
                 Create New Employee
               </button>
@@ -1205,8 +1180,9 @@ const visibleSteps =
                 <label>First Name <span className="required">*</span></label>
                 <input
                   value={form.personalDetailsDTO.firstName}
+                  maxLength={30}
                   onChange={(e) => {
-                    let val = e.target.value.replace(/[^A-Za-z]/g, ""); // remove numbers & symbols
+                    let val = e.target.value.replace(/[^A-Za-z]/g, "").slice(0, 30); // remove numbers & symbols, limit 30 chars
                     handleChange("personalDetailsDTO", "firstName", val);
                     validateField("firstName", val);
                     if (val && message === "❌ Please enter first name") setMessage("");
@@ -1231,8 +1207,9 @@ const visibleSteps =
 
                 <input
   value={form.personalDetailsDTO.middleName}
+  maxLength={30}
   onChange={(e) => {
-    let val = e.target.value.replace(/[^A-Za-z ]/g, "").slice(0, 50);
+    let val = e.target.value.replace(/[^A-Za-z ]/g, "").slice(0, 30);
     handleChange("personalDetailsDTO", "middleName", val);
   }}
   onKeyDown={(e) => {
@@ -1247,8 +1224,9 @@ const visibleSteps =
                 <label>Last Name <span className="required">*</span></label>
                 <input
                   value={form.personalDetailsDTO.lastName}
+                  maxLength={30}
                   onChange={(e) => {
-                    let val = e.target.value.replace(/[^A-Za-z]/g, "").slice(0,50);
+                    let val = e.target.value.replace(/[^A-Za-z]/g, "").slice(0, 30);
                     handleChange("personalDetailsDTO", "lastName", val);
                     validateField("lastName", val);
                     if (val && message === "❌ Please enter last name") setMessage("");
@@ -1630,10 +1608,11 @@ const visibleSteps =
                 <label>Work Location</label>
                 <input
                   value={form.jobDetailsDTO.workLocation}
-                  onChange={(e) => handleChange("jobDetailsDTO", "workLocation", e.target.value)}
+                  onChange={(e) => handleWorkLocationChange(e.target.value)}
                   placeholder="Enter work location"
                   className="modern-input"
                 />
+                {errors.workLocation && <small className="error">{errors.workLocation}</small>}
               </div>
             </div>
           </div>
@@ -1747,7 +1726,7 @@ const visibleSteps =
                 <input
                   value={form.bankDetailsDTO.accountNumber}
                   onChange={(e)=>{
-                    let val=e.target.value.replace(/\D/g,"").slice(0,30);
+                    let val=e.target.value.replace(/\D/g,"").slice(0,12);
                     handleChange("bankDetailsDTO","accountNumber",val);
                     if (val && message === "❌ Please enter account number") setMessage("");
                   }}

@@ -1068,7 +1068,7 @@ export default function HrDashBoard() {
                       type="text"
                       placeholder="e.g., John"
                       value={searchParams.firstName}
-                      maxLength={30}
+                      maxLength={32}
                       onFocus={() => handleFieldFocus('firstName')}
                       onChange={(e) => handleAlphabetFieldChange('firstName', e.target.value)}
                       className={searchErrors.firstName ? "input-error" : ""}

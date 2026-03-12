@@ -10,9 +10,6 @@
 //   const [deptError, setDeptError] = useState("");
 //   const [desgError, setDesgError] = useState("");
 
-//   const [deptFilter, setDeptFilter] = useState("");
-//   const [desgFilter, setDesgFilter] = useState("");
-
 //   const [editingDept, setEditingDept] = useState(null);
 //   const [editingDesg, setEditingDesg] = useState(null);
 //   const [editDeptName, setEditDeptName] = useState("");
@@ -20,6 +17,12 @@
 
 //   const [loadingDept, setLoadingDept] = useState(false);
 //   const [loadingDesg, setLoadingDesg] = useState(false);
+
+//   const [addingDept, setAddingDept] = useState(false);
+//   const [addingDesg, setAddingDesg] = useState(false);
+
+//   const [showDeptEditWarning, setShowDeptEditWarning] = useState(false);
+//   const [showDesgEditWarning, setShowDesgEditWarning] = useState(false);
 
 //   const fetchDepartments = async () => {
 //     try {
@@ -49,14 +52,21 @@
 
 //   const addDepartment = async () => {
 //     const deptVal = newDepartment.trim();
-//     if (!deptVal) { setDeptError("Department name is required"); return; }
-//     if (!/^[A-Za-z ]{2,30}$/.test(deptVal)) { setDeptError("Only letters allowed, 2-30 chars"); return; }
+//     if (!deptVal) { 
+//       setDeptError("Department name is required"); 
+//       return; 
+//     }
+//     if (!/^[A-Za-z ]{2,30}$/.test(deptVal)) { 
+//       setDeptError("Only letters allowed, 2-30 chars"); 
+//       return; 
+//     }
 //     setDeptError("");
 //     try {
 //       setLoadingDept(true);
 //       await axios.post(`/api/departments`, { departmentName: newDepartment }, { withCredentials: true });
 //       alert("Department created successfully");
 //       setNewDepartment("");
+//       setAddingDept(false); // Reset add mode
 //       fetchDepartments();
 //     } catch (error) {
 //       alert(error.response?.data?.message || "Create failed");
@@ -65,14 +75,21 @@
 
 //   const addDesignation = async () => {
 //     const desgVal = newDesignation.trim();
-//     if (!desgVal) { setDesgError("Designation name is required"); return; }
-//     if (!/^[A-Za-z ]{2,30}$/.test(desgVal)) { setDesgError("Only letters allowed, 2-30 chars"); return; }
+//     if (!desgVal) { 
+//       setDesgError("Designation name is required"); 
+//       return; 
+//     }
+//     if (!/^[A-Za-z ]{2,30}$/.test(desgVal)) { 
+//       setDesgError("Only letters allowed, 2-30 chars"); 
+//       return; 
+//     }
 //     setDesgError("");
 //     try {
 //       setLoadingDesg(true);
 //       await axios.post(`/api/dept/hr/DesignationName`, { designationName: newDesignation }, { withCredentials: true });
 //       alert("Designation created successfully");
 //       setNewDesignation("");
+//       setAddingDesg(false); // Reset add mode
 //       fetchDesignations();
 //     } catch (error) {
 //       alert(error.response?.data?.message || "Create failed");
@@ -81,13 +98,22 @@
 
 //   const updateDepartment = async (id) => {
 //     const trimmed = editDeptName.trim();
-//     if (!trimmed) { setDeptError("Department name is required"); return; }
-//     if (!/^[A-Za-z ]{1,30}$/.test(trimmed)) { setDeptError("Only letters allowed, 1-30 chars"); return; }
+//     if (!trimmed) { 
+//       setDeptError("Department name is required"); 
+//       return; 
+//     }
+//     if (!/^[A-Za-z ]{1,30}$/.test(trimmed)) { 
+//       setDeptError("Only letters allowed, 1-30 chars"); 
+//       return; 
+//     }
 
 //     try {
 //       await axios.put(`/api/departments/department-upate?departmentId=${id}`, { departmentName: trimmed }, { withCredentials: true });
 //       alert("Department updated successfully");
-//       setEditingDept(null); setEditDeptName(""); setDeptError(""); fetchDepartments();
+//       setEditingDept(null); 
+//       setEditDeptName(""); 
+//       setDeptError(""); 
+//       fetchDepartments();
 //     } catch (error) {
 //       alert(error.response?.data?.message || "Update failed");
 //     }
@@ -95,21 +121,87 @@
 
 //   const updateDesignation = async (id) => {
 //     const trimmed = editDesgName.trim();
-//     if (!trimmed) { setDesgError("Designation name is required"); return; }
-//     if (!/^[A-Za-z ]{1,30}$/.test(trimmed)) { setDesgError("Only letters allowed, 1-30 chars"); return; }
+//     if (!trimmed) { 
+//       setDesgError("Designation name is required"); 
+//       return; 
+//     }
+//     if (!/^[A-Za-z ]{1,30}$/.test(trimmed)) { 
+//       setDesgError("Only letters allowed, 1-30 chars"); 
+//       return; 
+//     }
 
 //     try {
 //       await axios.put(`/api/designations/designation-update?designationId=${id}`, { designationName: trimmed }, { withCredentials: true });
 //       alert("Designation updated successfully");
-//       setEditingDesg(null); setEditDesgName(""); setDesgError(""); fetchDesignations();
+//       setEditingDesg(null); 
+//       setEditDesgName(""); 
+//       setDesgError(""); 
+//       fetchDesignations();
 //     } catch (error) {
 //       alert(error.response?.data?.message || "Update failed");
 //     }
 //   };
 
-//   const startEditDept = (dept) => { setEditingDept(dept.id); setEditDeptName(dept.departmentName); };
-//   const startEditDesg = (desg) => { setEditingDesg(desg.id); setEditDesgName(desg.designationName); };
-//   const cancelEdit = () => { setEditingDept(null); setEditingDesg(null); setEditDeptName(""); setEditDesgName(""); };
+//   const startEditDept = (dept) => { 
+//     // Prevent edit if any add is active
+//     if (isAnyAddActive) {
+//       setDeptError("❌ Please finish adding first");
+//       return;
+//     }
+//     // Clear previous validation messages when starting a new edit session
+//     setDeptError("");
+//     setShowDeptEditWarning(false);
+//     setEditingDept(dept.id); 
+//     setEditDeptName(dept.departmentName); 
+//   };
+  
+//   const startEditDesg = (desg) => { 
+//     // Prevent edit if any add is active
+//     if (isAnyAddActive) {
+//       setDesgError("❌ Please finish adding first");
+//       return;
+//     }
+//     // Clear previous validation messages when starting a new edit session
+//     setDesgError("");
+//     setShowDesgEditWarning(false);
+//     setEditingDesg(desg.id); 
+//     setEditDesgName(desg.designationName); 
+//   };
+  
+//   const cancelEdit = () => { 
+//     setEditingDept(null); 
+//     setEditingDesg(null); 
+//     setEditDeptName(""); 
+//     setEditDesgName(""); 
+//     setShowDeptEditWarning(false);
+//     setShowDesgEditWarning(false);
+//   };
+
+//   const handleDeptInputFocus = () => {
+//     setAddingDept(true);
+//     // Clear any previous errors
+//     if (deptError) setDeptError("");
+//   };
+
+//   const handleDesgInputFocus = () => {
+//     setAddingDesg(true);
+//     // Clear any previous errors
+//     if (desgError) setDesgError("");
+//   };
+
+//   const handleDeptInputBlur = () => {
+//     // Only reset if input is empty and not in edit mode
+//     if (!newDepartment.trim() && !editingDept) {
+//       setAddingDept(false);
+//     }
+//   };
+
+//   const handleDesgInputBlur = () => {
+//     // Only reset if input is empty and not in edit mode
+//     if (!newDesignation.trim() && !editingDesg) {
+//       setAddingDesg(false);
+//     }
+//   };
 
 //   return (
 //     <div style={styles.page}>
@@ -136,28 +228,53 @@
 //               type="text"
 //               placeholder="Enter department name..."
 //               value={newDepartment}
+//               onFocus={handleDeptInputFocus}
+//               onBlur={handleDeptInputBlur}
 //               onChange={(e) => {
 //                 const rawVal = e.target.value;
 //                 if (/[^A-Za-z ]/.test(rawVal)) setDeptError("Numbers and special characters are not allowed");
 //                 else setDeptError("");
 //                 setNewDepartment(rawVal.replace(/[^A-Za-z ]/g, ""));
 //               }}
-//               style={styles.input}
+//               style={{
+//                 ...styles.input,
+//                 ...(isAnyEditActive && newDepartment ? styles.inputDisabled : {})
+//               }}
 //               onKeyPress={(e) => e.key === "Enter" && addDepartment()}
 //               maxLength={30}
+//               disabled={isAnyEditActive && !addingDept}
 //             />
-//             <button onClick={addDepartment} disabled={loadingDept} style={styles.addButton}>
+//             <button 
+//               onClick={addDepartment} 
+//               disabled={loadingDept || (isAnyEditActive && !addingDept)} 
+//               style={{
+//                 ...styles.addButton,
+//                 ...((isAnyEditActive && !addingDept) ? styles.buttonDisabled : {})
+//               }}
+//             >
 //               {loadingDept ? "Adding..." : "+ Add"}
 //             </button>
 //           </div>
-//           {deptError && <div style={styles.errorText}>{deptError}</div>}
+          
+//           {/* Error message with proper spacing */}
+//           {deptError && (
+//             <div style={styles.errorContainer}>
+//               <span style={styles.errorText}>{deptError}</span>
+//             </div>
+//           )}
+
+//           {/* Warning message when the user tried to add while editing */}
+//           {showDeptEditWarning && !deptError && (
+//             <div style={styles.warningContainer}>
+//               <span style={styles.warningText}>⚠️ Complete editing before adding new department</span>
+//             </div>
+//           )}
 
 //           <div style={styles.listContainer}>
 //             {departments.length === 0 ? (
 //               <div style={styles.emptyState}><p>No departments yet. Add your first department above.</p></div>
 //             ) : (
 //               departments
-//                 .filter(dept => dept.departmentName.toLowerCase().includes(deptFilter.toLowerCase()))
 //                 .map((dept) => (
 //                   <div key={dept.id} style={styles.listItem}>
 //                     {editingDept === dept.id ? (
@@ -168,14 +285,19 @@
 //                           onChange={(e) => {
 //                             const rawVal = e.target.value;
 //                             if (/[^A-Za-z ]/.test(rawVal)) setDeptError("Numbers and special characters are not allowed");
-//                             else if (rawVal.trim().length > 30) setDeptError("Must be 30 characters or less");
+//                             else if (rawVal.length < 1) setDeptError("Minimum 1 character required");
+//                             else if (rawVal.length > 32) setDeptError("Must be 32 characters or less");
 //                             else setDeptError("");
 //                             setEditDeptName(rawVal.replace(/[^A-Za-z ]/g, ""));
 //                           }}
 //                           style={styles.editInput}
 //                           autoFocus
+//                           minLength={1}
+//                           maxLength={32}
 //                         />
-//                         {deptError && <div style={styles.errorText}>{deptError}</div>}
+//                         {deptError && editingDept === dept.id && (
+//                           <div style={styles.editErrorText}>{deptError}</div>
+//                         )}
 //                         <div style={styles.editActions}>
 //                           <button onClick={() => updateDepartment(dept.id)} style={styles.saveButton} title="Save">✓</button>
 //                           <button onClick={cancelEdit} style={styles.cancelButton} title="Cancel">✕</button>
@@ -185,7 +307,17 @@
 //                       <>
 //                         <span style={styles.itemText}>{dept.departmentName}</span>
 //                         <div style={styles.actions}>
-//                           <button onClick={() => startEditDept(dept)} style={styles.editButton} title="Edit"> Edit</button>
+//                           <button 
+//                             onClick={() => startEditDept(dept)} 
+//                             style={{
+//                               ...styles.editButton,
+//                               ...(isAnyAddActive ? styles.buttonDisabled : {})
+//                             }}
+//                             disabled={isAnyAddActive}
+//                             title={isAnyAddActive ? "Finish adding first" : "Edit"}
+//                           >
+//                             Edit
+//                           </button>
 //                         </div>
 //                       </>
 //                     )}
@@ -207,28 +339,55 @@
 //               type="text"
 //               placeholder="Enter designation name..."
 //               value={newDesignation}
+//               onFocus={handleDesgInputFocus}
+//               onBlur={handleDesgInputBlur}
 //               onChange={(e) => {
 //                 const rawVal = e.target.value;
 //                 if (/[^A-Za-z ]/.test(rawVal)) setDesgError("Numbers and special characters are not allowed");
+//                 else if (rawVal.length < 1) setDesgError("Minimum 1 character required");
+//                 else if (rawVal.length > 32) setDesgError("Must be 32 characters or less");
 //                 else setDesgError("");
 //                 setNewDesignation(rawVal.replace(/[^A-Za-z ]/g, ""));
 //               }}
-//               style={styles.input}
+//               style={{
+//                 ...styles.input,
+//                 ...(isAnyEditActive && newDesignation ? styles.inputDisabled : {})
+//               }}
 //               onKeyPress={(e) => e.key === "Enter" && addDesignation()}
 //               maxLength={30}
+//               disabled={isAnyEditActive && !addingDesg}
 //             />
-//             <button onClick={addDesignation} disabled={loadingDesg} style={styles.addButton}>
+//             <button 
+//               onClick={addDesignation} 
+//               disabled={loadingDesg || (isAnyEditActive && !addingDesg)} 
+//               style={{
+//                 ...styles.addButton,
+//                 ...((isAnyEditActive && !addingDesg) ? styles.buttonDisabled : {})
+//               }}
+//             >
 //               {loadingDesg ? "Adding..." : "+ Add"}
 //             </button>
 //           </div>
-//           {desgError && <div style={styles.errorText}>{desgError}</div>}
+          
+//           {/* Error message with proper spacing */}
+//           {desgError && (
+//             <div style={styles.errorContainer}>
+//               <span style={styles.errorText}>{desgError}</span>
+//             </div>
+//           )}
+
+//           {/* Warning message when the user tried to add while editing */}
+//           {showDesgEditWarning && !desgError && (
+//             <div style={styles.warningContainer}>
+//               <span style={styles.warningText}>⚠️ Complete editing before adding new designation</span>
+//             </div>
+//           )}
 
 //           <div style={styles.listContainer}>
 //             {designations.length === 0 ? (
 //               <div style={styles.emptyState}><p>No designations yet. Add your first designation above.</p></div>
 //             ) : (
 //               designations
-//                 .filter(desg => desg.designationName.toLowerCase().includes(desgFilter.toLowerCase()))
 //                 .map((desg) => (
 //                   <div key={desg.id} style={styles.listItem}>
 //                     {editingDesg === desg.id ? (
@@ -239,14 +398,19 @@
 //                           onChange={(e) => {
 //                             const rawVal = e.target.value;
 //                             if (/[^A-Za-z ]/.test(rawVal)) setDesgError("Numbers and special characters are not allowed");
-//                             else if (rawVal.trim().length > 30) setDesgError("Must be 30 characters or less");
+//                             else if (rawVal.length < 1) setDesgError("Minimum 1 character required");
+//                             else if (rawVal.length > 32) setDesgError("Must be 32 characters or less");
 //                             else setDesgError("");
 //                             setEditDesgName(rawVal.replace(/[^A-Za-z ]/g, ""));
 //                           }}
 //                           style={styles.editInput}
 //                           autoFocus
+//                           minLength={1}
+//                           maxLength={32}
 //                         />
-//                         {desgError && <div style={styles.errorText}>{desgError}</div>}
+//                         {desgError && editingDesg === desg.id && (
+//                           <div style={styles.editErrorText}>{desgError}</div>
+//                         )}
 //                         <div style={styles.editActions}>
 //                           <button onClick={() => updateDesignation(desg.id)} style={styles.saveButton} title="Save">✓</button>
 //                           <button onClick={cancelEdit} style={styles.cancelButton} title="Cancel">✕</button>
@@ -256,7 +420,17 @@
 //                       <>
 //                         <span style={styles.itemText}>{desg.designationName}</span>
 //                         <div style={styles.actions}>
-//                           <button onClick={() => startEditDesg(desg)} style={styles.editButton} title="Edit"> Edit</button>
+//                           <button 
+//                             onClick={() => startEditDesg(desg)} 
+//                             style={{
+//                               ...styles.editButton,
+//                               ...(isAnyAddActive ? styles.buttonDisabled : {})
+//                             }}
+//                             disabled={isAnyAddActive}
+//                             title={isAnyAddActive ? "Finish adding first" : "Edit"}
+//                           >
+//                             Edit
+//                           </button>
 //                         </div>
 //                       </>
 //                     )}
@@ -388,6 +562,12 @@
 //     transition: "border-color 0.2s",
 //   },
 
+//   inputDisabled: {
+//     backgroundColor: "#f3f4f6",
+//     cursor: "not-allowed",
+//     opacity: 0.7,
+//   },
+
 //   addButton: {
 //     padding: "10px 22px",
 //     borderRadius: "10px",
@@ -402,11 +582,49 @@
 //     transition: "all 0.2s ease",
 //   },
 
+//   buttonDisabled: {
+//     opacity: 0.5,
+//     cursor: "not-allowed",
+//     pointerEvents: "none",
+//   },
+
+//   errorContainer: {
+//     marginTop: "8px",
+//     marginBottom: "12px",
+//     padding: "8px 12px",
+//     backgroundColor: "#fef2f2",
+//     borderRadius: "8px",
+//     border: "1px solid #fee2e2",
+//   },
+
 //   errorText: {
-//     color: "#ef4444",
+//     color: "#dc2626",
 //     fontSize: "13px",
-//     marginBottom: "10px",
-//     marginTop: "2px",
+//     fontWeight: "500",
+//     display: "block",
+//   },
+
+//   editErrorText: {
+//     color: "#dc2626",
+//     fontSize: "12px",
+//     marginTop: "4px",
+//     marginBottom: "4px",
+//   },
+
+//   warningContainer: {
+//     marginTop: "8px",
+//     marginBottom: "12px",
+//     padding: "8px 12px",
+//     backgroundColor: "#fffbeb",
+//     borderRadius: "8px",
+//     border: "1px solid #fef3c7",
+//   },
+
+//   warningText: {
+//     color: "#b45309",
+//     fontSize: "13px",
+//     fontWeight: "500",
+//     display: "block",
 //   },
 
 //   listContainer: {
@@ -458,13 +676,13 @@
 
 //   editContainer: {
 //     display: "flex",
-//     gap: "10px",
+//     flexDirection: "column",
+//     gap: "8px",
 //     width: "100%",
-//     alignItems: "center",
 //   },
 
 //   editInput: {
-//     flex: 1,
+//     width: "100%",
 //     padding: "9px 14px",
 //     borderRadius: "8px",
 //     border: "2px solid #2563EB",
@@ -478,6 +696,7 @@
 //   editActions: {
 //     display: "flex",
 //     gap: "8px",
+//     justifyContent: "flex-end",
 //   },
 
 //   saveButton: {
@@ -541,11 +760,9 @@ export default function Department() {
   const [loadingDept, setLoadingDept] = useState(false);
   const [loadingDesg, setLoadingDesg] = useState(false);
 
-  // New state to track if add form is active
   const [addingDept, setAddingDept] = useState(false);
   const [addingDesg, setAddingDesg] = useState(false);
 
-  // Show a warning only after user attempts to add while editing
   const [showDeptEditWarning, setShowDeptEditWarning] = useState(false);
   const [showDesgEditWarning, setShowDesgEditWarning] = useState(false);
 
@@ -575,14 +792,10 @@ export default function Department() {
     fetchDesignations();
   }, []);
 
-  // Check if any edit operation is active
   const isAnyEditActive = editingDept !== null || editingDesg !== null;
-
-  // Check if any add operation is active
   const isAnyAddActive = addingDept || addingDesg;
 
   const addDepartment = async () => {
-    // Prevent add if edit is active
     if (isAnyEditActive) {
       setDeptError("❌ Please finish editing first");
       setShowDeptEditWarning(true);
@@ -605,7 +818,7 @@ export default function Department() {
       await axios.post(`/api/departments`, { departmentName: newDepartment }, { withCredentials: true });
       alert("Department created successfully");
       setNewDepartment("");
-      setAddingDept(false); // Reset add mode
+      setAddingDept(false);
       fetchDepartments();
     } catch (error) {
       alert(error.response?.data?.message || "Create failed");
@@ -613,7 +826,6 @@ export default function Department() {
   };
 
   const addDesignation = async () => {
-    // Prevent add if edit is active
     if (isAnyEditActive) {
       setDesgError("❌ Please finish editing first");
       setShowDesgEditWarning(true);
@@ -636,7 +848,7 @@ export default function Department() {
       await axios.post(`/api/dept/hr/DesignationName`, { designationName: newDesignation }, { withCredentials: true });
       alert("Designation created successfully");
       setNewDesignation("");
-      setAddingDesg(false); // Reset add mode
+      setAddingDesg(false);
       fetchDesignations();
     } catch (error) {
       alert(error.response?.data?.message || "Create failed");
@@ -690,27 +902,19 @@ export default function Department() {
   };
 
   const startEditDept = (dept) => { 
-    // Prevent edit if any add is active
     if (isAnyAddActive) {
       setDeptError("❌ Please finish adding first");
       return;
     }
-    // Clear previous validation messages when starting a new edit session
-    setDeptError("");
-    setShowDeptEditWarning(false);
     setEditingDept(dept.id); 
     setEditDeptName(dept.departmentName); 
   };
   
   const startEditDesg = (desg) => { 
-    // Prevent edit if any add is active
     if (isAnyAddActive) {
       setDesgError("❌ Please finish adding first");
       return;
     }
-    // Clear previous validation messages when starting a new edit session
-    setDesgError("");
-    setShowDesgEditWarning(false);
     setEditingDesg(desg.id); 
     setEditDesgName(desg.designationName); 
   };
@@ -726,25 +930,21 @@ export default function Department() {
 
   const handleDeptInputFocus = () => {
     setAddingDept(true);
-    // Clear any previous errors
     if (deptError) setDeptError("");
   };
 
   const handleDesgInputFocus = () => {
     setAddingDesg(true);
-    // Clear any previous errors
     if (desgError) setDesgError("");
   };
 
   const handleDeptInputBlur = () => {
-    // Only reset if input is empty and not in edit mode
     if (!newDepartment.trim() && !editingDept) {
       setAddingDept(false);
     }
   };
 
   const handleDesgInputBlur = () => {
-    // Only reset if input is empty and not in edit mode
     if (!newDesignation.trim() && !editingDesg) {
       setAddingDesg(false);
     }
@@ -803,14 +1003,12 @@ export default function Department() {
             </button>
           </div>
           
-          {/* Error message with proper spacing */}
           {deptError && (
             <div style={styles.errorContainer}>
               <span style={styles.errorText}>{deptError}</span>
             </div>
           )}
 
-          {/* Warning message when the user tried to add while editing */}
           {showDeptEditWarning && !deptError && (
             <div style={styles.warningContainer}>
               <span style={styles.warningText}>⚠️ Complete editing before adding new department</span>
@@ -831,10 +1029,16 @@ export default function Department() {
                           value={editDeptName}
                           onChange={(e) => {
                             const rawVal = e.target.value;
+                            if (/[^A-Za-z ]/.test(rawVal)) setDeptError("Numbers and special characters are not allowed");
+                            else if (rawVal.length < 1) setDeptError("Minimum 1 character required");
+                            else if (rawVal.length > 32) setDeptError("Must be 32 characters or less");
+                            else setDeptError("");
                             setEditDeptName(rawVal.replace(/[^A-Za-z ]/g, ""));
                           }}
                           style={styles.editInput}
                           autoFocus
+                          minLength={1}
+                          maxLength={32}
                         />
                         {deptError && editingDept === dept.id && (
                           <div style={styles.editErrorText}>{deptError}</div>
@@ -885,6 +1089,8 @@ export default function Department() {
               onChange={(e) => {
                 const rawVal = e.target.value;
                 if (/[^A-Za-z ]/.test(rawVal)) setDesgError("Numbers and special characters are not allowed");
+                else if (rawVal.length < 1) setDesgError("Minimum 1 character required");
+                else if (rawVal.length > 32) setDesgError("Must be 32 characters or less");
                 else setDesgError("");
                 setNewDesignation(rawVal.replace(/[^A-Za-z ]/g, ""));
               }}
@@ -908,14 +1114,12 @@ export default function Department() {
             </button>
           </div>
           
-          {/* Error message with proper spacing */}
           {desgError && (
             <div style={styles.errorContainer}>
               <span style={styles.errorText}>{desgError}</span>
             </div>
           )}
 
-          {/* Warning message when the user tried to add while editing */}
           {showDesgEditWarning && !desgError && (
             <div style={styles.warningContainer}>
               <span style={styles.warningText}>⚠️ Complete editing before adding new designation</span>
@@ -936,10 +1140,16 @@ export default function Department() {
                           value={editDesgName}
                           onChange={(e) => {
                             const rawVal = e.target.value;
+                            if (/[^A-Za-z ]/.test(rawVal)) setDesgError("Numbers and special characters are not allowed");
+                            else if (rawVal.length < 1) setDesgError("Minimum 1 character required");
+                            else if (rawVal.length > 32) setDesgError("Must be 32 characters or less");
+                            else setDesgError("");
                             setEditDesgName(rawVal.replace(/[^A-Za-z ]/g, ""));
                           }}
                           style={styles.editInput}
                           autoFocus
+                          minLength={1}
+                          maxLength={32}
                         />
                         {desgError && editingDesg === desg.id && (
                           <div style={styles.editErrorText}>{desgError}</div>

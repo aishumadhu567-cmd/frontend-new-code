@@ -456,7 +456,7 @@ export default class EmpProfile extends Component {
               <span style={S.heroDeptPill}>{data.departmentName || "—"}</span>
             </div>
             <div style={S.heroIdRow}>
-              <span style={S.heroIdChip}>🪪 ID: {data.userId || "N/A"}</span>
+              
               <span style={S.heroIdChip}>📧 {data.emailId || "—"}</span>
               <span style={S.heroIdChip}>📞 {data.phoneNumber || "—"}</span>
             </div>

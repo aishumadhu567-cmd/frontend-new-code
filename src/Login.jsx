@@ -97,13 +97,16 @@ if (name === 'username') {
 
     /* -------- PASSWORD (VALIDATION: 2-30) -------- */
     if (name === 'password') {
-      const passwordError =
-        value && (value.length < 2 || value.length > 30)
-          ? 'Password must be 2-30 characters'
-          : '';
-
-      this.setState({ password: value, passwordError });
+      // Avoid showing error while the user is typing.
+      // Only validate on blur or submit.
+      this.setState({ password: value, passwordError: '' });
     }
+  };
+
+  validatePassword = (password) => {
+    if (!password) return 'Password is required';
+    if (password.length < 2 || password.length > 30) return 'Password must be 2-30 characters';
+    return '';
   };
  
   togglePassword = () => {
@@ -129,13 +132,9 @@ if (name === 'username') {
       return;
     }
  
-    if (!password) {
-      this.setState({ error: 'Password is required' });
-      return;
-    }
-
-    if (passwordError) {
-      this.setState({ error: '' });
+    const passwordErrorMsg = this.validatePassword(password);
+    if (passwordErrorMsg) {
+      this.setState({ passwordError: passwordErrorMsg, error: '' });
       return;
     }
 
@@ -246,6 +245,7 @@ if (name === 'username') {
                   name="password"
                   value={this.state.password}
                   onChange={this.handleChange}
+                  onBlur={(e) => this.setState({ passwordError: this.validatePassword(e.target.value) })}
                   className={`login-input password-input ${this.state.passwordError ? "input-error" : ""}`}
                   placeholder="Enter Password"
                   required

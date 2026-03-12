@@ -1,4 +1,4 @@
-import api from "./api";
+//import api from "./api";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./HrCalculateSalary.css";

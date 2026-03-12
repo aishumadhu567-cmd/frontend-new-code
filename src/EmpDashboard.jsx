@@ -1,12 +1,11 @@
 import React, { Component } from "react";
 import { Navigate } from "react-router-dom";
 import { 
-  FiHome, FiUser, FiDollarSign, FiCalendar, 
+  FiHome, FiCalendar, 
   FiLogOut, FiSettings, FiMenu, FiX, FiEye, FiEyeOff,
   FiUsers, FiClock, FiLock
 } from "react-icons/fi";
 
-import EmpProfile from "./EmpProfile";
 import EmpSalary from "./EmpSalary";
 import EmployeeHolidayCalendar from "./EmployeeHolidayCalendar";
 import ReportingManager from "./ReportingManager";
@@ -121,6 +120,11 @@ export default class EmpDashboard extends Component {
   };
 
   handleNavigation = (page) => {
+    if (page === "changePassword") {
+      this.setState({ activePage: page, showChangePassword: true, showMenu: false, sidebarOpen: false });
+      return;
+    }
+
     this.setState({ activePage: page, sidebarOpen: false });
   };
 
@@ -184,8 +188,6 @@ export default class EmpDashboard extends Component {
 
   renderContent() {
     switch (this.state.activePage) {
-      case "profile":
-        return <EmpProfile />;
       case "salary":
         return <EmpSalary />;
       case "empleavemanagement":
@@ -300,7 +302,7 @@ export default class EmpDashboard extends Component {
 
     const menuItems = [
       { key: "dashboard", label: "Dashboard", icon: <FiHome /> },
-      { key: "profile", label: "My Profile", icon: <FiUser /> },
+      { key: "changePassword", label: "Change Password", icon: <FiLock /> },
       { key: "salary", label: "Salary", icon: <FaRupeeSign /> },
       { key: "empleavemanagement", label: "Leave Management", icon: <FiClock /> },
       { key: "EmployeeHolidayCalendar", label: "Holiday Calendar", icon: <FiCalendar /> },

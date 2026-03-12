@@ -17,7 +17,8 @@ export default class Login extends Component {
     showPassword: false,
     redirectTo: null,
     error: '',
-    usernameError: ''
+    usernameError: '',
+    passwordError: ''
   };
  
   /* ================= INPUT HANDLER ================= */
@@ -94,9 +95,14 @@ if (name === 'username') {
 }
 
 
-    /* -------- PASSWORD (NO VALIDATION) -------- */
+    /* -------- PASSWORD (VALIDATION: 2-30) -------- */
     if (name === 'password') {
-      this.setState({ password: value });
+      const passwordError =
+        value && (value.length < 2 || value.length > 30)
+          ? 'Password must be 2-30 characters'
+          : '';
+
+      this.setState({ password: value, passwordError });
     }
   };
  
@@ -109,22 +115,27 @@ if (name === 'username') {
     e.preventDefault();
     this.setState({ error: '' });
  
-    const { username, password, usernameError } = this.state;
+    const { username, password, usernameError, passwordError } = this.state;
  
     // if (!username) {
     //   this.setState({ error: 'Employee ID is required' });
     //   return;
     // }
     if (!/^VPPL\d{3}$/.test(username)) {
-  this.setState({
-    usernameError: 'Employee ID must be VPPL followed by exactly 3 digits',
-    error: ''
-  });
-  return;
-}
+      this.setState({
+        usernameError: 'Employee ID must be VPPL followed by exactly 3 digits',
+        error: ''
+      });
+      return;
+    }
  
     if (!password) {
       this.setState({ error: 'Password is required' });
+      return;
+    }
+
+    if (passwordError) {
+      this.setState({ error: '' });
       return;
     }
 
@@ -235,9 +246,11 @@ if (name === 'username') {
                   name="password"
                   value={this.state.password}
                   onChange={this.handleChange}
-                  className="login-input password-input"
+                  className={`login-input password-input ${this.state.passwordError ? "input-error" : ""}`}
                   placeholder="Enter Password"
                   required
+                  minLength={2}
+                  maxLength={30}
                 />
                 <button
                   type="button"
@@ -248,6 +261,11 @@ if (name === 'username') {
                   {this.state.showPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
               </div>
+              {this.state.passwordError && (
+                <div className="field-error" style={{ color: 'rgb(214, 19, 16)' }}>
+                  {this.state.passwordError}
+                </div>
+              )}
               <button className="login-button">Login</button>
  
               <Link to="/forgot-password" className="forgot-link">

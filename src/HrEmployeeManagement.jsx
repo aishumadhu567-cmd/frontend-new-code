@@ -10,7 +10,9 @@ function HrEmployeeManagement() {
   const [mode, setMode] = useState("create");
   const [userId, setUserId] = useState(null);
   const [errors, setErrors] = useState({});
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+  const [touched, setTouched] = useState({});
+  const [docError, setDocError] = useState("");
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
   // Current step tracker
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 8;
@@ -159,6 +161,11 @@ const formRef = useRef(null);
       [section]: { ...prev[section], [field]: value },
     }));
   };
+
+  const markTouched = (field) => {
+    setTouched(prev => ({ ...prev, [field]: true }));
+  };
+
   const validateField = (field, value) => {
     let err = "";
 
@@ -167,12 +174,12 @@ const formRef = useRef(null);
 if (field === "ifsc") {
   const ifscRegex = /^[A-Z]{4}0[A-Z0-9]{6}$/;
 
-  if (!value)
-    err = "IFSC code is required";
-  else if (value.length !== 11)
-    err = "IFSC must be 11 characters";
-  else if (!ifscRegex.test(value))
-    err = "Invalid IFSC format (e.g., SBIN0001234)";
+  if (value) {
+    if (value.length !== 11)
+      err = "IFSC must be 11 characters";
+    else if (!ifscRegex.test(value))
+      err = "Invalid IFSC format (e.g., SBIN0001234)";
+  }
 }
 
 // Only alphabets regex
@@ -180,26 +187,32 @@ const nameRegex = /^[A-Za-z]+$/;
 const nameSpaceRegex = /^[A-Za-z ]+$/;
 
 if (field === "firstName") {
-  if (!nameRegex.test(value))
-    err = "First name should contain only alphabets";
-  else if (value.length < 2)
-    err = "First name must be at least 2 characters";
+  if (value) {
+    if (!nameRegex.test(value))
+      err = "First name should contain only alphabets";
+    else if (value.length < 2)
+      err = "First name must be at least 2 characters";
+  }
 }
 
     if (field === "lastName") {
-      if (!nameRegex.test(value))
-        err = "Last name should contain only alphabets";
-      else if (value.length > 50)
-        err = "Last name cannot exceed 50 characters";
+      if (value) {
+        if (!nameRegex.test(value))
+          err = "Last name should contain only alphabets";
+        else if (value.length > 50)
+          err = "Last name cannot exceed 50 characters";
+      }
     }
 
     if (field === "dob") {
-      const dob = new Date(value);
-      const today = new Date();
-      const age = today.getFullYear() - dob.getFullYear();
+      if (value) {
+        const dob = new Date(value);
+        const today = new Date();
+        const age = today.getFullYear() - dob.getFullYear();
 
-      if (age < 20)
-        err = "Employee age must be at least 20 years";
+        if (age < 20)
+          err = "Employee age must be at least 20 years";
+      }
     }
 
 
@@ -213,63 +226,69 @@ if (field === "pan") {
 }
 
     if (field === "aadhaar") {
-      if (!/^[2-9][0-9]{11}$/.test(value))
-        err = "Aadhaar must be 12 digits and cannot start with 0 or 1";
-      else if (existingAadhaars.includes(value))
-        err = "Aadhaar already exists";
+      if (value) {
+        if (!/^[2-9][0-9]{11}$/.test(value))
+          err = "Aadhaar must be 12 digits and cannot start with 0 or 1";
+        else if (existingAadhaars.includes(value))
+          err = "Aadhaar already exists";
+      }
     }
 
     if (field === "bankName" || field === "branchName") {
-      if (!value) {
-        err = `${field === "bankName" ? "Bank" : "Branch"} name is required`;
-      } else if (!nameSpaceRegex.test(value)) {
-        err = "Only alphabets and spaces are allowed";
-      } else if (value.length < 2) {
-        err = "Must be at least 2 characters";
-      } else if (value.length > 30) {
-        err = "Cannot exceed 30 characters";
+      if (value) {
+        if (!nameSpaceRegex.test(value)) {
+          err = "Only alphabets and spaces are allowed";
+        } else if (value.length < 2) {
+          err = "Must be at least 2 characters";
+        } else if (value.length > 30) {
+          err = "Cannot exceed 30 characters";
+        }
       }
     }
 
     if (field === "accountNumber") {
-      if (!value) {
-        err = "Account number is required";
-      } else if (!/^[0-9]+$/.test(value)) {
-        err = "Account number must contain only digits";
-      } else if (value.length < 2) {
-        err = "Must be at least 2 digits";
-      } else if (value.length > 30) {
-        err = "Cannot exceed 30 digits";
+      if (value) {
+        if (!/^[0-9]+$/.test(value)) {
+          err = "Account number must contain only digits";
+        } else if (value.length < 2) {
+          err = "Must be at least 2 digits";
+        } else if (value.length > 30) {
+          err = "Cannot exceed 30 digits";
+        }
       }
     }
 
     if (field === "phone") {
-      if (!/^[6-9][0-9]{9}$/.test(value))
-        err = "Phone must start with 6,7,8,9 and be 10 digits";
-      else if (existingPhones.includes(value))
-        err = "Phone number already exists";
+      if (value) {
+        if (!/^[6-9][0-9]{9}$/.test(value))
+          err = "Phone must start with 6,7,8,9 and be 10 digits";
+        else if (existingPhones.includes(value))
+          err = "Phone number already exists";
+      }
     }
 
     if (field === "email") {
-      const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
-      if (!emailRegex.test(value))
-        err = "Enter valid email format";
-      else if (existingEmails.includes(value))
-        err = "Email already exists";
+      if (value) {
+        const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+        if (!emailRegex.test(value))
+          err = "Enter valid email format";
+        else if (existingEmails.includes(value))
+          err = "Email already exists";
+      }
     }
 
     if (field === "address") {
-      if (value.trim().length < 10)
+      if (value && value.trim().length < 10)
         err = "Address must be at least 10 characters";
     }
 
     if (field === "emergencyName") {
-      if (!/^[A-Za-z ]{2,50}$/.test(value))
+      if (value && !/^[A-Za-z ]{2,50}$/.test(value))
         err = "Only alphabets allowed (min 2 characters)";
     }
 
     if (field === "emergencyPhone") {
-      if (!/^[6-9][0-9]{9}$/.test(value))
+      if (value && !/^[6-9][0-9]{9}$/.test(value))
         err = "Invalid emergency phone number";
     }
 
@@ -502,18 +521,7 @@ if (hasErrors) {
         setErrors(prev => ({ ...prev, ctc: "Valid CTC amount is required" }));
         return false;
       }
-      if (!form.employeeStatutoryDetailsDTO.pfUan) {
-        setErrors(prev => ({ ...prev, uan: "PF UAN is required" }));
-        return false;
-      }
-      if (!form.employeeStatutoryDetailsDTO.esi) {
-        setErrors(prev => ({ ...prev, esi: "ESI number is required" }));
-        return false;
-      }
-      if (!form.employeeStatutoryDetailsDTO.min) {
-        setErrors(prev => ({ ...prev, min: "Medical insurance number is required" }));
-        return false;
-      }
+      // PF UAN, ESI and Medical Insurance Number are optional fields.
       break;
 
     default:
@@ -682,6 +690,9 @@ setCurrentStep(2); // Move to next step after loading
 const handleFileChange = async (docKey, file) => {
   if (!file) return;
 
+  // ✅ Clear any document-level error on new file selection
+  setDocError("");
+
   // ✅ File size validation
   if (file.size > MAX_FILE_SIZE) {
     setMessage("❌ File size exceeds 10 MB. Please upload a smaller file.");
@@ -716,6 +727,7 @@ const handleFileChange = async (docKey, file) => {
     if (!userId) return;
     const docConfig = documents.find(d => d.key === docKey);
     if (!docConfig) return;
+    setDocError("");
 
     setUploadingDocuments(prev => ({ ...prev, [docKey]: true }));
     try {
@@ -770,6 +782,31 @@ const handleFileChange = async (docKey, file) => {
   if (loading) return;
 
   if (!validateCurrentStep()) return;
+
+  // ✅ Validate mandatory documents before submitting
+  const missingDocs = documents
+    .filter((doc) => doc.mandatory)
+    .filter((doc) => {
+      const hasUploaded = Boolean(uploadedFiles[doc.key]);
+      const hasExisting = existingDocuments.some((d) => d.documentName === doc.documentName);
+      return !(hasUploaded || hasExisting);
+    });
+
+  if (missingDocs.length > 0) {
+    const firstMissing = missingDocs[0];
+    setDocError(`Please upload required document: ${firstMissing.displayName}`);
+    setMessage("❌ Please upload all required documents before submitting.");
+
+    // Scroll to the missing document card if present
+    setTimeout(() => {
+      const element = document.getElementById(`doc-${firstMissing.key}`);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }, 10);
+
+    return;
+  }
 
   try {
     setLoading(true);
@@ -1324,6 +1361,10 @@ const visibleSteps =
                   onChange={(e) => {
                     let val = e.target.value.replace(/\D/g,"").slice(0,12);
                     handleChange("personalDetailsDTO", "aadhaarNumber", val);
+                  }}
+                  onBlur={(e) => {
+                    const val = e.target.value;
+                    markTouched("aadhaar");
                     validateField("aadhaar", val);
                   }}
                   placeholder="12-digit Aadhaar"
@@ -1375,6 +1416,10 @@ const visibleSteps =
     val = val.slice(0, 10);
 
     handleChange("personalDetailsDTO", "panNumber", val);
+  }}
+  onBlur={(e) => {
+    const val = e.target.value;
+    markTouched("pan");
     validateField("pan", val);
   }}
   placeholder="ABCDE1234F"
@@ -1401,8 +1446,12 @@ const visibleSteps =
                   onChange={(e) => {
                     let val = e.target.value.replace(/\D/g,"").slice(0,10);
                     handleChange("personalDetailsDTO","phoneNumber",val);
-                    validateField("phone",val);
                     if (val && message === "❌ Please enter phone number") setMessage("");
+                  }}
+                  onBlur={(e) => {
+                    const val = e.target.value;
+                    markTouched("phone");
+                    validateField("phone", val);
                   }}
                   placeholder="10-digit phone"
                   className="modern-input"
@@ -1417,8 +1466,12 @@ const visibleSteps =
                   onChange={(e)=>{
                     const val=e.target.value.toLowerCase();
                     handleChange("personalDetailsDTO","emailId",val);
-                    validateField("email",val);
                     if (val && message === "❌ Please enter email") setMessage("");
+                  }}
+                  onBlur={(e) => {
+                    const val = e.target.value;
+                    markTouched("email");
+                    validateField("email", val);
                   }}
                   placeholder="example@domain.com"
                   className="modern-input"
@@ -1432,8 +1485,12 @@ const visibleSteps =
                   onChange={(e)=>{
                     const val=e.target.value;
                     handleChange("personalDetailsDTO","address1",val);
-                    validateField("address",val);
                     if (val && message === "❌ Please enter current address") setMessage("");
+                  }}
+                  onBlur={(e) => {
+                    const val = e.target.value;
+                    markTouched("address");
+                    validateField("address", val);
                   }}
                   rows="3"
                   className="modern-input"
@@ -1457,7 +1514,11 @@ const visibleSteps =
                   onChange={(e)=>{
                     let val=e.target.value.replace(/[^A-Za-z ]/g,"").slice(0,50);
                     handleChange("personalDetailsDTO","emergencyContactName",val);
-                    validateField("emergencyName",val);
+                  }}
+                  onBlur={(e) => {
+                    const val = e.target.value;
+                    markTouched("emergencyName");
+                    validateField("emergencyName", val);
                   }}
                   className="modern-input"
                 />
@@ -1490,7 +1551,11 @@ const visibleSteps =
                   onChange={(e)=>{
                     let val=e.target.value.replace(/\D/g,"").slice(0,10);
                     handleChange("personalDetailsDTO","emergencyPhoneNumber",val);
-                    validateField("emergencyPhone",val);
+                  }}
+                  onBlur={(e) => {
+                    const val = e.target.value;
+                    markTouched("emergencyPhone");
+                    validateField("emergencyPhone", val);
                   }}
                   className="modern-input"
                 />
@@ -1666,8 +1731,12 @@ const visibleSteps =
                   onChange={(e)=>{
                     let val=e.target.value.replace(/[^A-Za-z ]/g,"").slice(0,30);
                     handleChange("bankDetailsDTO","bankName",val);
-                    validateField("bankName",val);
                     if (val && message === "❌ Please enter bank name") setMessage("");
+                  }}
+                  onBlur={(e) => {
+                    const val = e.target.value;
+                    markTouched("bankName");
+                    validateField("bankName", val);
                   }}
                   className="modern-input"
                 />
@@ -1680,8 +1749,12 @@ const visibleSteps =
                   onChange={(e)=>{
                     let val=e.target.value.replace(/\D/g,"").slice(0,30);
                     handleChange("bankDetailsDTO","accountNumber",val);
-                    validateField("accountNumber",val);
                     if (val && message === "❌ Please enter account number") setMessage("");
+                  }}
+                  onBlur={(e) => {
+                    const val = e.target.value;
+                    markTouched("accountNumber");
+                    validateField("accountNumber", val);
                   }}
                   className="modern-input"
                 />
@@ -1694,8 +1767,12 @@ const visibleSteps =
                   onChange={(e)=>{
                     let val=e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,11);
                     handleChange("bankDetailsDTO","ifsc",val);
-                    validateField("ifsc",val);
                     if (val && message === "❌ Please enter IFSC code") setMessage("");
+                  }}
+                  onBlur={(e) => {
+                    const val = e.target.value;
+                    markTouched("ifsc");
+                    validateField("ifsc", val);
                   }}
                   placeholder="SBIN0001234"
                   className="modern-input"
@@ -1709,7 +1786,11 @@ const visibleSteps =
                   onChange={(e)=>{
                     let val=e.target.value.replace(/[^A-Za-z ]/g,"").slice(0,30);
                     handleChange("bankDetailsDTO","branchName",val);
-                    validateField("branchName",val);
+                  }}
+                  onBlur={(e) => {
+                    const val = e.target.value;
+                    markTouched("branchName");
+                    validateField("branchName", val);
                   }}
                   className="modern-input"
                 />
@@ -1722,7 +1803,11 @@ const visibleSteps =
                   onChange={(e)=>{
                     let val=e.target.value.replace(/[^A-Za-z ]/g,"").slice(0,50);
                     handleChange("bankDetailsDTO","beneficiaryName",val);
-                    validateField("beneficiary",val);
+                  }}
+                  onBlur={(e) => {
+                    const val = e.target.value;
+                    markTouched("beneficiary");
+                    validateField("beneficiary", val);
                   }}
                   className="modern-input"
                 />
@@ -1747,10 +1832,12 @@ const visibleSteps =
               <div className="input-group full-width">
                 <label>CTC (Annual) <span className="required">*</span></label>
                 <input
-                  type="number"
+                  type="text"
                   value={form.salaryDetailsDTO.ctc}
                   onChange={(e) => {
-                    const val = e.target.value;
+                    const raw = e.target.value;
+                    // Allow only digits (no spinner controls)
+                    const val = raw.replace(/[^0-9]/g, "");
                     handleChange("salaryDetailsDTO", "ctc", val);
                     if (val && Number(val) > 0 && message === "❌ Please enter valid CTC amount") setMessage("");
                     if (val && Number(val) > 0) setErrors(prev => ({ ...prev, ctc: "" }));
@@ -1811,7 +1898,7 @@ const visibleSteps =
               <h4>Statutory Details</h4>
               <div className="form-grid-2">
                 <div className="input-group">
-                  <label>PF UAN<span className="required">*</span></label>
+                  <label>PF UAN</label>
                   <input
                     value={form.employeeStatutoryDetailsDTO.pfUan}
                     onChange={(e)=>{
@@ -1825,7 +1912,7 @@ const visibleSteps =
                   {errors.uan && <small className="error">{errors.uan}</small>}
                 </div>
                 <div className="input-group">
-                  <label>ESI Number<span className="required">*</span></label>
+                  <label>ESI Number</label>
                   <input
                     value={form.employeeStatutoryDetailsDTO.esi}
                     onChange={(e)=>{
@@ -1839,7 +1926,7 @@ const visibleSteps =
                   {errors.esi && <small className="error">{errors.esi}</small>}
                 </div>
                 <div className="input-group full-width">
-                  <label>Medical Insurance Number<span className="required">*</span></label>
+                  <label>Medical Insurance Number</label>
                   <input
                     value={form.employeeStatutoryDetailsDTO.min}
                     onChange={(e) => handleChange("employeeStatutoryDetailsDTO", "min", e.target.value)}
@@ -1859,6 +1946,7 @@ const visibleSteps =
               <h3>📄 Document Uploads</h3>
               <p>Upload required documents</p>
             </div>
+            {docError && <div className="error" style={{ marginBottom: 12 }}>{docError}</div>}
             {mode === "edit" && existingDocuments.length > 0 && (
               <div className="existing-docs">
                 <h4>Existing Documents</h4>
@@ -1876,7 +1964,7 @@ const visibleSteps =
                 const existing = existingDocuments.find((d) => d.documentName === doc.documentName);
 
                 return (
-                  <div key={doc.id} className="doc-upload-card">
+                  <div key={doc.id} id={`doc-${doc.key}`} className="doc-upload-card">
                     <div className="doc-header">
                       <h5>{doc.displayName}</h5>
                       {doc.mandatory && <span className="badge-required">Required</span>}

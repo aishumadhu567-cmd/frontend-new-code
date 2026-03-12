@@ -357,7 +357,7 @@
 //     </div>
 //   );
 // }
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 
 const styles = `
@@ -699,6 +699,7 @@ export default function HolidayCalendar() {
   const [newLocation, setNewLocation] = useState("");
   const [form, setForm] = useState({ holidayName: "", holidayDate: "", holidayTypeId: "", holidayLocationId: "" });
   const [toast, setToast] = useState({ message: "", type: "" });
+  const formRef = useRef(null);
 
   const showToast = (message, type = "success") => {
     setToast({ message, type });
@@ -790,8 +791,15 @@ export default function HolidayCalendar() {
     const id = h.id || h.holidayId || h.hId;
     if (!id) { alert("Cannot edit: ID not found"); return; }
     setForm({ holidayName: h.holidayName || "", holidayDate: h.holidayDate || "", holidayTypeId: h.holidayTypeId?.toString() || "", holidayLocationId: h.holidayLocationId?.toString() || "" });
-    setEditingId(id); setIsEditing(true);
+    setEditingId(id);
+    setIsEditing(true);
   };
+
+  useEffect(() => {
+    if (isEditing && formRef.current) {
+      formRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [isEditing]);
 
   const deleteHoliday = async (h) => {
     if (!window.confirm("Delete this holiday?")) return;
@@ -835,7 +843,7 @@ export default function HolidayCalendar() {
   
 
           {/* Add / Edit Card */}
-          <div className="hc-card">
+          <div className="hc-card" ref={formRef}>
             <div className="hc-card-title">
               
               {isEditing ? "✏️ Edit Holiday" : "Add New Holiday"}

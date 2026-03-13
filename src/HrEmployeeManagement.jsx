@@ -1796,6 +1796,8 @@ const visibleSteps =
           </div>
         );
 
+
+        
       case 7:
         return (
           <div className="step-content">

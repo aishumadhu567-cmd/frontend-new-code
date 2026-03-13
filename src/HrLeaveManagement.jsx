@@ -1230,7 +1230,7 @@ showNotification("LOP recorded successfully!", "success");
                 value={lopForm.reason}
                 onChange={handleLopChange}
                 rows="4"
-                maxLength={500}
+                maxLength={120}
                 required
               />
               {reasonError && (
@@ -1239,7 +1239,7 @@ showNotification("LOP recorded successfully!", "success");
                 </div>
               )}
               <small className="form-help">
-                {lopForm.reason.length}/500 characters
+                {lopForm.reason.length}/120 characters
               </small>
             </div>
 

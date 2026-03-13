@@ -17,6 +17,7 @@ export default defineConfig({
   port: 5173,
   proxy: {
     '/api': {
+      // target:'http://localhost:8085',
       target: 'https://dev.hrms.venturebiz.in/',
       changeOrigin: true,
       secure: false,
